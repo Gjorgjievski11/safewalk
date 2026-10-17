@@ -53,3 +53,41 @@ export async function postReport(report, file) {
   const data = await res.json();   // { id, report_text, photo_url? }
   return { ...report, street: '', photo_url: URL.createObjectURL(file), ...data };
 }
+
+// from, to: L.LatLng -> { direct: {coords: [[lat,lon],...], length?}, safer: {...}, demo? }
+export async function getRoute(from, to) {
+  if (USE_MOCK) {
+    await sleep(600);
+    return { ...mockRoute(from, to), demo: true };
+  }
+  const res = await fetch(`/route?from=${from.lat},${from.lng}&to=${to.lat},${to.lng}`);
+  if (!res.ok) throw new Error(`GET /route ${res.status}`);
+  return res.json();
+}
+
+// fake route: straight line vs. a line that bulges sideways
+export function mockRoute(from, to) {
+  const N = 12;
+  const dy = to.lat - from.lat;
+  const dx = to.lng - from.lng;
+  const direct = [];
+  const safer = [];
+  for (let i = 0; i <= N; i++) {
+    const t = i / N;
+    const lat = from.lat + dy * t;
+    const lon = from.lng + dx * t;
+    direct.push([lat, lon]);
+    const bulge = Math.sin(Math.PI * t) * 0.18;
+    safer.push([lat + dx * bulge, lon - dy * bulge]);
+  }
+  return { direct: { coords: direct }, safer: { coords: safer } };
+}
+
+// -> [{street, count, labels}] from the server, or null in mock mode
+// (hotspots.js then ranks the pins locally)
+export async function getHotspots() {
+  if (USE_MOCK) return null;
+  const res = await fetch('/hotspots');
+  if (!res.ok) throw new Error(`GET /hotspots ${res.status}`);
+  return res.json();
+}

@@ -27,6 +27,7 @@
     + Report a problem
   </button>
 
+  <!-- report sheet -->
   <div id="sheet" hidden
     class="fixed inset-x-0 bottom-0 z-[1100] box-border max-h-[60dvh] overflow-y-auto rounded-t-2xl bg-white p-4 pb-[calc(env(safe-area-inset-bottom,0px)+16px)] shadow-2xl sm:inset-x-auto sm:bottom-4 sm:right-4 sm:max-h-[80vh] sm:w-[380px] sm:rounded-2xl sm:pb-4">
     <div class="mb-3 flex items-center justify-between">
@@ -68,7 +69,47 @@
     </div>
   </div>
 
-  
+  <!-- route UI (M3) -->
+  <button id="routeBtn"
+    class="absolute left-3 top-[calc(env(safe-area-inset-top,0px)+12px)] z-[1000] rounded-xl bg-white/95 px-3.5 py-2.5 text-sm font-semibold shadow-lg">
+    Route
+  </button>
+
+  <div id="routePanel" hidden
+    class="absolute left-3 top-[calc(env(safe-area-inset-top,0px)+12px)] z-[1000] flex max-w-[calc(100vw-130px)] items-center gap-2 rounded-xl bg-blue-600 py-2 pl-3.5 pr-1.5 text-sm font-semibold text-white shadow-lg">
+    <span id="routeHint"></span>
+    <button id="routeCancel" aria-label="Cancel" class="rounded-lg px-2.5 py-1.5 text-base">✕</button>
+  </div>
+
+  <div id="routeCard" hidden
+    class="fixed inset-x-0 bottom-0 z-[1100] box-border rounded-t-2xl bg-white p-4 pb-[calc(env(safe-area-inset-bottom,0px)+16px)] shadow-2xl sm:inset-x-auto sm:bottom-4 sm:right-4 sm:w-[380px] sm:rounded-2xl sm:pb-4">
+    <div class="mb-2 flex items-center justify-between">
+      <b>Route</b>
+      <button id="routeClose" aria-label="Close" class="-m-2 p-2 px-3 text-xl">✕</button>
+    </div>
+    <div id="routeBody" class="flex flex-col gap-2"></div>
+    <button id="routeNew"
+      class="mt-3 min-h-12 w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-base">New route</button>
+  </div>
+
+  <!-- hotspots UI (M4) -->
+  <button id="hotspotsBtn"
+    class="absolute left-3 top-[calc(env(safe-area-inset-top,0px)+60px)] z-[1000] rounded-xl bg-white/95 px-3.5 py-2.5 text-sm font-semibold shadow-lg">
+    Hotspots
+  </button>
+
+  <div id="hotPanel" hidden
+    class="fixed inset-x-0 bottom-0 z-[1100] box-border max-h-[60dvh] overflow-y-auto rounded-t-2xl bg-white p-4 pb-[calc(env(safe-area-inset-bottom,0px)+16px)] shadow-2xl sm:inset-x-auto sm:bottom-4 sm:right-4 sm:max-h-[80vh] sm:w-[380px] sm:rounded-2xl sm:pb-4">
+    <div class="mb-3 flex items-center justify-between">
+      <b>Worst streets</b>
+      <button id="hotClose" aria-label="Close" class="-m-2 p-2 px-3 text-xl">✕</button>
+    </div>
+    <div id="hotList" class="flex flex-col gap-2"></div>
+    <p id="hotEmpty" hidden class="m-0 text-sm text-gray-600">No reports with a street yet.</p>
+    <button id="csvBtn"
+      class="mt-3 min-h-12 w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-base">Download CSV</button>
+  </div>
+
   <script type="module" src="/app.js"></script>
 </body>
 </html>

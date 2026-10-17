@@ -1,4 +1,6 @@
 import * as api from './api.js';
+import { initRoute } from './route.js';
+import { initHotspots } from './hotspots.js';
 
 const LABELS = {
   parked_on_sidewalk: { color: '#ef4444', name: 'Parked on sidewalk' },
@@ -19,6 +21,8 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 map.attributionControl.setPosition('bottomleft');
 const pins = L.layerGroup().addTo(map);
+
+let reports = [];
 
 function popupFor(r) {
   const el = document.createElement('div');
@@ -47,12 +51,13 @@ function addPin(r) {
   return L.circleMarker([r.lat, r.lon], {
     radius: 10, color: '#fff', weight: 2,
     fillColor: style.color, fillOpacity: 0.95,
+    bubblingMouseEvents: false,
   }).bindPopup(popupFor(r)).addTo(pins);
 }
 
 async function load() {
   try {
-    const reports = await api.getReports();
+    reports = await api.getReports();
     pins.clearLayers();
     reports.forEach(addPin);
   } catch (e) {
@@ -129,6 +134,8 @@ function openSheet() {
   sheetOpen = true;
   $('sheet').hidden = false;
   $('fab').hidden = true;
+  $('routeBtn').hidden = true;
+  $('hotspotsBtn').hidden = true;
   $('legend').classList.add('hidden');
 }
 
@@ -150,6 +157,8 @@ function resetFlow() {
   $('copy').textContent = 'Copy text';
   $('sheet').hidden = true;
   $('fab').hidden = false;
+  $('routeBtn').hidden = false;
+  $('hotspotsBtn').hidden = false;
   $('legend').classList.remove('hidden');
   updateSubmit();
 }
@@ -214,6 +223,7 @@ $('submit').addEventListener('click', async () => {
     );
     if (pending) { map.removeLayer(pending); pending = null; }
     const marker = addPin(report);
+    reports.push(report);
     map.flyTo([report.lat, report.lon], Math.max(map.getZoom(), 16));
     marker.openPopup();
 
@@ -242,3 +252,5 @@ $('copy').addEventListener('click', async () => {
 buildLegend();
 buildSelect();
 load();
+initRoute({ map, api, getPins: () => reports });
+initHotspots({ map, api, getPins: () => reports, labels: LABELS });
