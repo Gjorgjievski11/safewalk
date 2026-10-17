@@ -56,10 +56,6 @@ export async function postReport(report, file) {
 
 // from, to: L.LatLng -> { direct: {coords: [[lat,lon],...], length?}, safer: {...}, demo? }
 export async function getRoute(from, to) {
-  if (USE_MOCK) {
-    await sleep(600);
-    return { ...mockRoute(from, to), demo: true };
-  }
   const res = await fetch(`/route?from=${from.lat},${from.lng}&to=${to.lat},${to.lng}`);
   if (!res.ok) throw new Error(`GET /route ${res.status}`);
   return res.json();

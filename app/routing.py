@@ -1,4 +1,5 @@
 from pathlib import Path
+from math import cos, radians
 from typing import Iterable
 
 import networkx as nx
@@ -6,8 +7,8 @@ import osmnx as ox
 
 
 GRAPH_PATH = Path(__file__).resolve().parents[1] / "data" / "area.graphml"
-PIN_PENALTY = 200
 DARK_PENALTY = 100
+SAFE_RADIUS_M = 75
 MAX_SNAP_M = 300
 
 G = ox.load_graphml(GRAPH_PATH)
@@ -35,16 +36,43 @@ def _pin_coordinates(pin: dict) -> tuple[float, float]:
         raise ValueError("reports must contain valid lat/lon coordinates") from exc
 
 
-def _apply_costs(pins: list[dict]) -> None:
-    bad: dict[frozenset[int], int] = {}
-    if pins:
-        xs, ys = zip(*((lon, lat) for lat, lon in map(_pin_coordinates, pins)))
-        for u, v, _key in ox.distance.nearest_edges(G, X=xs, Y=ys):
-            edge = frozenset((int(u), int(v)))
-            bad[edge] = bad.get(edge, 0) + 1
+def _segment_distance(
+    point: tuple[float, float],
+    start: list[float],
+    end: list[float],
+) -> float:
+    """Approximate distance in metres from a point to a lat/lon segment."""
+    lat_scale = 110540
+    lon_scale = 111320 * cos(radians(point[0]))
+    px = (point[1] - start[1]) * lon_scale
+    py = (point[0] - start[0]) * lat_scale
+    bx = (end[1] - start[1]) * lon_scale
+    by = (end[0] - start[0]) * lat_scale
+    length_squared = bx * bx + by * by
+    fraction = 0 if not length_squared else max(
+        0, min(1, (px * bx + py * by) / length_squared)
+    )
+    return ((px - bx * fraction) ** 2 + (py - by * fraction) ** 2) ** 0.5
 
-    for u, v, _key, data in G.edges(keys=True, data=True):
-        cost = float(data["length"]) + PIN_PENALTY * bad.get(frozenset((u, v)), 0)
+
+def _edge_distance_to_pin(u: int, v: int, data: dict, pin: tuple[float, float]) -> float:
+    geometry = data.get("geometry")
+    if geometry is None:
+        points = [
+            [float(G.nodes[u]["y"]), float(G.nodes[u]["x"])],
+            [float(G.nodes[v]["y"]), float(G.nodes[v]["x"])],
+        ]
+    else:
+        points = [[lat, lon] for lon, lat in geometry.coords]
+    return min(
+        _segment_distance(pin, start, end)
+        for start, end in zip(points, points[1:])
+    )
+
+
+def _apply_costs(graph: nx.MultiDiGraph) -> None:
+    for _u, _v, _key, data in graph.edges(keys=True, data=True):
+        cost = float(data["length"])
         if str(data.get("lit", "")).lower() == "no":
             cost += DARK_PENALTY
         data["cost"] = cost
@@ -89,9 +117,17 @@ def make_routes(
     if start_distance > MAX_SNAP_M or end_distance > MAX_SNAP_M:
         raise ValueError("point is outside the demo area")
 
-    _apply_costs(pins)
     direct_path = nx.shortest_path(G, start_node, end_node, weight="length")
-    safer_path = nx.shortest_path(G, start_node, end_node, weight="cost")
+    safe_graph = G.copy()
+    pin_points = [_pin_coordinates(pin) for pin in pins]
+    blocked_edges = [
+        (u, v, key)
+        for u, v, key, data in safe_graph.edges(keys=True, data=True)
+        if any(_edge_distance_to_pin(u, v, data, pin) <= SAFE_RADIUS_M for pin in pin_points)
+    ]
+    safe_graph.remove_edges_from(blocked_edges)
+    _apply_costs(safe_graph)
+    safer_path = nx.shortest_path(safe_graph, start_node, end_node, weight="cost")
     direct = _describe(direct_path)
     safer = _describe(safer_path)
     direct_reports = _reports_on_route(direct_path, pins)

@@ -1,6 +1,6 @@
 const $ = (id) => document.getElementById(id);
 
-const PROBLEM_RADIUS = 20; // meters
+const PROBLEM_RADIUS = 75; // match the backend's safe-routing exclusion radius
 const fmt = (m) => (m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`);
 const plural = (n) => `${n} ${n === 1 ? 'problem' : 'problems'}`;
 
