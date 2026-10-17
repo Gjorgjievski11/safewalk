@@ -17,6 +17,7 @@ dependencies = [
     "pillow>=13.0.0",
     "python-dotenv>=1.2.4",
     "python-multipart>=0.0.32",
+    "requests>=2.34.2",
     "torch>=2.14.1",
     "torchvision>=0.29.1",
     "uvicorn[standard]>=0.54.0",
