@@ -5,4 +5,7 @@ uploads/*
 !uploads/.gitkeep
 *.db
 .cache/
+cache/
 data/*
+!data/area.graphml
+!data/seed.json

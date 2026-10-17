@@ -1,6 +1,6 @@
 import { MOCK_REPORTS } from './mock.js';
 
-export const USE_MOCK = true;   // flip to false when the backend is up
+export const USE_MOCK = true;
 
 const MOCK_LABELS = ['parked_on_sidewalk', 'overgrown', 'dark_street', 'broken_light'];
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -65,7 +65,7 @@ export async function getRoute(from, to) {
   return res.json();
 }
 
-// fake route: straight line vs. a line that bulges sideways
+// Kept for offline UI development; production routing always uses the backend.
 export function mockRoute(from, to) {
   const N = 12;
   const dy = to.lat - from.lat;

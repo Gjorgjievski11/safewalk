@@ -124,7 +124,10 @@ export function initRoute({ map, api, getPins }) {
       r = await api.getRoute(start, end);
     } catch (e) {
       console.error(e);
-      r = { ...api.mockRoute(start, end), demo: true, failed: true };
+      $('routeBody').innerHTML =
+        '<p class="m-0 text-sm text-red-700">Could not find a walking route here. Try points closer to a mapped street.</p>';
+      setMode('done');
+      return;
     }
     if (my !== token) return;   // cleared while loading
     show(r);

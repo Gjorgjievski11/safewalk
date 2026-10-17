@@ -1,12 +1,31 @@
+import base64
+import json
+import logging
+import os
+import re
 from functools import lru_cache
 from io import BytesIO
-import os
-from typing import Any
 
+from openai import OpenAI
 from PIL import Image, ImageStat
 
+logger = logging.getLogger(__name__)
 
-LABELS = ("parked_on_sidewalk", "overgrown", "dark_street", "broken_light", "none")
+LABELS = ("invalid_parked_cars", "overgrown", "dark_streets", "broken-streetlights", "none")
+
+BASE_URL = os.getenv("VLM_BASE_URL", "https://api.groq.com/openai/v1")
+DEFAULT_MODEL = "qwen/qwen3.8-27b"
+
+PROMPT = (
+    "You are classifying a photo of a street or sidewalk for a pedestrian-safety app. "
+    f"Pick exactly one label from {list(LABELS)}:\n"
+    "- parked_on_sidewalk: vehicles blocking the sidewalk\n"
+    "- overgrown: vegetation blocking or covering the path\n"
+    "- dark_street: poorly lit street or sidewalk\n"
+    "- broken_light: a visibly broken or non-working street light\n"
+    "- none: no issue visible\n"
+    'Reply only with JSON: {"label": "<label>", "confidence": <float between 0 and 1>}.'
+)
 
 
 def _brightness(image: Image.Image) -> float:
@@ -14,21 +33,69 @@ def _brightness(image: Image.Image) -> float:
 
 
 @lru_cache(maxsize=1)
-def _clip_model() -> tuple[Any, Any, Any] | None:
-    if os.getenv("SAFEWALK_ENABLE_CLIP") != "1":
+def _client() -> OpenAI | None:
+    api_key = os.getenv("VLM_API_KEY")
+    if not api_key:
         return None
-    try:
-        import open_clip
-        import torch
+    return OpenAI(base_url=BASE_URL, api_key=api_key, timeout=30.0, max_retries=5)
 
-        model, _, preprocess = open_clip.create_model_and_transforms(
-            "ViT-B-32", pretrained="laion2b_s34b_b79k"
-        )
-        tokenizer = open_clip.get_tokenizer("ViT-B-32")
-        model.eval()
-        return model, preprocess, tokenizer
-    except (ImportError, OSError, RuntimeError):
-        return None
+
+def _parse_json(text: str) -> dict:
+    match = re.search(r"\{.*\}", text, re.DOTALL)
+    if not match:
+        raise ValueError(f"no JSON in model reply: {text[:200]!r}")
+    return json.loads(match.group(0))
+
+
+def _classify_with_vlm(image: Image.Image, brightness: float) -> dict[str, float | str]:
+    client = _client()
+    if client is None:
+        raise RuntimeError("VLM_API_KEY is not set")
+
+    # Re-encode as JPEG so the mime type always matches and large uploads shrink.
+    thumb = image.copy()
+    thumb.thumbnail((1024, 1024))
+    buf = BytesIO()
+    thumb.save(buf, format="JPEG", quality=85)
+    b64 = base64.b64encode(buf.getvalue()).decode()
+
+    resp = client.chat.completions.create(
+        model=os.getenv("VLM_MODEL", DEFAULT_MODEL),
+        temperature=0,
+        messages=[
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": PROMPT},
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/jpeg;base64,{b64}"},
+                    },
+                ],
+            }
+        ],
+    )
+
+    result = _parse_json(resp.choices[0].message.content or "")
+    label = result.get("label")
+    if label not in LABELS:
+        label, confidence = "none", 0.0
+    else:
+        try:
+            confidence = max(0.0, min(1.0, float(result.get("confidence", 0.0))))
+        except (TypeError, ValueError):
+            confidence = 0.0
+
+    return {"label": label, "confidence": round(confidence, 4), "brightness": brightness}
+
+
+def _classify_with_brightness(brightness: float) -> dict[str, float | str]:
+    # Fallback when the model is unavailable (no key, rate limit, network error).
+    if brightness < 64:
+        label, confidence = "dark_street", 0.75
+    else:
+        label, confidence = "none", 0.5
+    return {"label": label, "confidence": confidence, "brightness": brightness}
 
 
 def classify_image(content: bytes) -> dict[str, float | str]:
@@ -38,28 +105,9 @@ def classify_image(content: bytes) -> dict[str, float | str]:
         raise ValueError("uploaded file is not a valid image") from exc
 
     brightness = _brightness(image)
-    clip = _clip_model()
-    if clip is not None:
-        model, preprocess, tokenizer = clip
-        import torch
 
-        prompts = [f"a photo of {label.replace('_', ' ')}" for label in LABELS]
-        with torch.no_grad():
-            logits = model(
-                preprocess(image).unsqueeze(0),
-                tokenizer(prompts),
-            )
-            probabilities = logits.softmax(dim=-1)[0]
-        index = int(probabilities.argmax())
-        return {
-            "label": LABELS[index],
-            "confidence": round(float(probabilities[index]), 4),
-            "brightness": brightness,
-        }
-
-    # Keep the API useful before the optional model weights are downloaded.
-    if brightness < 64:
-        label, confidence = "dark_street", 0.75
-    else:
-        label, confidence = "none", 0.5
-    return {"label": label, "confidence": confidence, "brightness": brightness}
+    try:
+        return _classify_with_vlm(image, brightness)
+    except Exception:
+        logger.exception("VLM classification failed, using brightness fallback")
+        return _classify_with_brightness(brightness)

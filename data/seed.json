@@ -1,0 +1,12 @@
+[
+  {"label": "parked_on_sidewalk", "lat": 41.9965, "lon": 21.4314, "street": "Demo Street A", "report_text": "Automobile parked on sidewalk."},
+  {"label": "parked_on_sidewalk", "lat": 41.9992, "lon": 21.4281, "street": "Demo Street A", "report_text": "Vehicles block the sidewalk."},
+  {"label": "overgrown", "lat": 42.0011, "lon": 21.4203, "street": "Demo Street B", "report_text": "Overgrown vegetation blocks the path."},
+  {"label": "overgrown", "lat": 41.9944, "lon": 21.4172, "street": "Demo Street B", "report_text": "Bushes cover the sidewalk."},
+  {"label": "dark_street", "lat": 41.9978, "lon": 21.4339, "street": "Demo Street C", "report_text": "Street has no lighting at night."},
+  {"label": "dark_street", "lat": 42.0023, "lon": 21.4260, "street": "Demo Street C", "report_text": "A long section of the road is dark."},
+  {"label": "broken_light", "lat": 41.9951, "lon": 21.4243, "street": "Demo Street D", "report_text": "Street light is not working."},
+  {"label": "broken_light", "lat": 41.9999, "lon": 21.4380, "street": "Demo Street C", "report_text": "Broken light on the pedestrian path."},
+  {"label": "parked_on_sidewalk", "lat": 41.9930, "lon": 21.4290, "street": "Demo Street A", "report_text": "Vehicles parked on the sidewalk."},
+  {"label": "overgrown", "lat": 42.0040, "lon": 21.4330, "street": "Demo Street B", "report_text": "Trees and bushes narrow the passage."}
+]

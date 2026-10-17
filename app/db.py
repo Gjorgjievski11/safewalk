@@ -9,6 +9,7 @@ from typing import Any
 
 
 DB_PATH = Path(os.getenv("SAFEWALK_DB", "data/safewalk.db"))
+SEED_PATH = Path(__file__).resolve().parents[1] / "data" / "seed.json"
 
 
 def _connection() -> sqlite3.Connection:
@@ -35,6 +36,31 @@ def init_db() -> None:
             )
             """
         )
+        has_demo_data = connection.execute(
+            "SELECT 1 FROM reports WHERE street LIKE 'Demo Street %' LIMIT 1"
+        ).fetchone()
+        if has_demo_data is None:
+            seed = json.loads(SEED_PATH.read_text(encoding="utf-8")) if SEED_PATH.exists() else []
+            connection.executemany(
+                """
+                INSERT INTO reports
+                    (label, confidence, brightness, latitude, longitude, street, draft, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                [
+                    (
+                        report["label"],
+                        report.get("confidence"),
+                        report.get("brightness"),
+                        report["lat"],
+                        report["lon"],
+                        report.get("street"),
+                        report.get("report_text", ""),
+                        report.get("created_at", datetime.now(UTC).isoformat()),
+                    )
+                    for report in seed
+                ],
+            )
 
 
 def create_report(

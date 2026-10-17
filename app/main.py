@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 
+from networkx import NetworkXNoPath
 from fastapi import FastAPI, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.responses import PlainTextResponse
 from fastapi.staticfiles import StaticFiles
@@ -89,8 +90,16 @@ def route(
     try:
         start, end = parse_point(from_), parse_point(to)
     except ValueError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
-    return make_routes(start, end, list_reports())
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    try:
+        return make_routes(start, end, list_reports())
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except NetworkXNoPath as exc:
+        raise HTTPException(
+            status_code=404,
+            detail="no walkable path",
+        ) from exc
 
 
 @app.get("/hotspots")
