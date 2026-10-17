@@ -1,1 +1,52 @@
-<h1>safewalk</h1>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Safe Walk Skopje</title>
+  <link rel="stylesheet" href="/vendor/leaflet.css">
+  <link rel="stylesheet" href="/style.css">
+  <script src="/vendor/leaflet.js"></script>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="legend"></div>
+  <button id="fab">+ Report a problem</button>
+
+  <div id="sheet" hidden>
+    <div class="sheet-head">
+      <b>Report a problem</b>
+      <button id="close" aria-label="Close">✕</button>
+    </div>
+
+    <div id="form">
+      <label class="btn" id="pick">
+        Take or choose a photo
+        <input id="file" type="file" accept="image/*" hidden>
+      </label>
+      <img id="preview" alt="" hidden>
+      <div id="status"></div>
+
+      <select id="label" hidden></select>
+
+      <div id="loc">
+        <span id="loc-text">Tap the map to place the pin</span>
+        <button id="geo" class="link">Use my location</button>
+      </div>
+
+      <button id="submit" class="btn primary" disabled>Submit report</button>
+    </div>
+
+    <div id="result" hidden>
+      <b>Report ready</b>
+      <p id="result-text"></p>
+      <div class="row">
+        <button id="copy" class="btn">Copy text</button>
+        <button id="done" class="btn primary">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
