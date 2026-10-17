@@ -1,52 +1,74 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Safe Walk Skopje</title>
   <link rel="stylesheet" href="/vendor/leaflet.css">
-  <link rel="stylesheet" href="/style.css">
+  <script src="/vendor/tailwind.js"></script>
   <script src="/vendor/leaflet.js"></script>
+  <style>[hidden]{display:none!important}</style>
 </head>
-<body>
-  <div id="map"></div>
-  <div id="legend"></div>
-  <button id="fab">+ Report a problem</button>
+<body class="m-0 h-full font-sans">
+  <div id="map" class="fixed inset-0"></div>
 
-  <div id="sheet" hidden>
-    <div class="sheet-head">
+  <details id="legend"
+    class="group absolute right-3 top-[calc(env(safe-area-inset-top,0px)+12px)] z-[1000] max-w-[calc(100vw-80px)] overflow-hidden rounded-xl bg-white/95 text-sm shadow-lg">
+    <summary
+      class="flex cursor-pointer list-none select-none items-center justify-between gap-3 px-3 py-2.5 font-semibold [&::-webkit-details-marker]:hidden">
+      Legend
+      <span class="text-xs opacity-60 transition-transform group-open:rotate-180">▾</span>
+    </summary>
+    <div id="legend-rows" class="flex flex-col gap-2.5 border-t border-gray-200 px-3 pb-3 pt-2.5"></div>
+  </details>
+
+  <button id="fab"
+    class="absolute inset-x-4 bottom-[calc(env(safe-area-inset-bottom,0px)+32px)] z-[1000] min-h-[52px] rounded-2xl bg-blue-600 px-5 py-4 text-[17px] font-semibold text-white shadow-lg sm:inset-x-auto sm:bottom-7 sm:right-4 sm:min-h-0 sm:rounded-full sm:px-6 sm:py-3.5">
+    + Report a problem
+  </button>
+
+  <div id="sheet" hidden
+    class="fixed inset-x-0 bottom-0 z-[1100] box-border max-h-[60dvh] overflow-y-auto rounded-t-2xl bg-white p-4 pb-[calc(env(safe-area-inset-bottom,0px)+16px)] shadow-2xl sm:inset-x-auto sm:bottom-4 sm:right-4 sm:max-h-[80vh] sm:w-[380px] sm:rounded-2xl sm:pb-4">
+    <div class="mb-3 flex items-center justify-between">
       <b>Report a problem</b>
-      <button id="close" aria-label="Close">✕</button>
+      <button id="close" aria-label="Close" class="-m-2 p-2 px-3 text-xl">✕</button>
     </div>
 
-    <div id="form">
-      <label class="btn" id="pick">
+    <div id="form" class="flex flex-col gap-2.5">
+      <label
+        class="block min-h-12 cursor-pointer rounded-xl border border-gray-300 bg-gray-50 px-4 py-3.5 text-center text-base">
         Take or choose a photo
         <input id="file" type="file" accept="image/*" hidden>
       </label>
-      <img id="preview" alt="" hidden>
-      <div id="status"></div>
+      <img id="preview" alt="" hidden class="max-h-[120px] w-full rounded-lg object-cover">
+      <div id="status" class="text-sm text-gray-700"></div>
 
-      <select id="label" hidden></select>
+      <select id="label" hidden class="rounded-xl border border-gray-300 bg-white p-3 text-base"></select>
 
-      <div id="loc">
+      <div class="flex flex-wrap items-center justify-between gap-2 text-sm">
         <span id="loc-text">Tap the map to place the pin</span>
-        <button id="geo" class="link">Use my location</button>
+        <button id="geo" class="py-2 text-sm text-blue-600">Use my location</button>
       </div>
 
-      <button id="submit" class="btn primary" disabled>Submit report</button>
+      <button id="submit" disabled
+        class="block min-h-12 w-full rounded-xl border border-blue-600 bg-blue-600 px-4 py-3.5 text-center text-base font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40">
+        Submit report
+      </button>
     </div>
 
-    <div id="result" hidden>
+    <div id="result" hidden class="flex flex-col gap-2.5">
       <b>Report ready</b>
-      <p id="result-text"></p>
-      <div class="row">
-        <button id="copy" class="btn">Copy text</button>
-        <button id="done" class="btn primary">Done</button>
+      <p id="result-text" class="m-0 rounded-lg bg-gray-100 p-2.5 text-[15px]"></p>
+      <div class="flex gap-2">
+        <button id="copy"
+          class="min-h-12 flex-1 rounded-xl border border-gray-300 bg-gray-50 px-4 py-3.5 text-base">Copy text</button>
+        <button id="done"
+          class="min-h-12 flex-1 rounded-xl border border-blue-600 bg-blue-600 px-4 py-3.5 text-base font-semibold text-white">Done</button>
       </div>
     </div>
   </div>
 
+  
   <script type="module" src="/app.js"></script>
 </body>
 </html>
