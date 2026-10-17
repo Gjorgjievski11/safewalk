@@ -1,5 +1,5 @@
 version = 1
-revision = 5
+revision = 3
 requires-python = ">=3.12"
 resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'win32'",
@@ -303,8 +303,8 @@ name = "httpcore2"
 version = "2.13.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "h11" },
-    { name = "truststore" },
+    { name = "h11", marker = "sys_platform != 'emscripten'" },
+    { name = "truststore", marker = "sys_platform != 'emscripten'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/cb/f3/1db7aa2bc2524062192bb0e0323969492d1883152a232fe36eea65f4e35c/httpcore2-2.13.1.tar.gz", hash = "sha256:e0aa977abe17e69a3b820a24542a6fa88702676d83880b8d194dcd18408e5103", size = 68071, upload-time = "2026-09-23T07:47:22.372Z" }
 wheels = [
@@ -1421,6 +1421,7 @@ dependencies = [
     { name = "pillow" },
     { name = "python-dotenv" },
     { name = "python-multipart" },
+    { name = "requests" },
     { name = "torch", version = "2.14.1", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "sys_platform == 'darwin'" },
     { name = "torch", version = "2.14.1+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "sys_platform != 'darwin'" },
     { name = "torchvision", version = "0.29.1", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "sys_platform == 'darwin'" },
@@ -1439,6 +1440,7 @@ requires-dist = [
     { name = "pillow", specifier = ">=13.0.0" },
     { name = "python-dotenv", specifier = ">=1.2.4" },
     { name = "python-multipart", specifier = ">=0.0.32" },
+    { name = "requests", specifier = ">=2.34.2" },
     { name = "torch", specifier = ">=2.14.1", index = "https://download.pytorch.org/whl/cpu" },
     { name = "torchvision", specifier = ">=0.29.1", index = "https://download.pytorch.org/whl/cpu" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.54.0" },
@@ -1588,13 +1590,13 @@ resolution-markers = [
     "python_full_version < '3.14' and sys_platform == 'darwin'",
 ]
 dependencies = [
-    { name = "filelock" },
-    { name = "fsspec" },
-    { name = "jinja2" },
-    { name = "networkx" },
-    { name = "setuptools" },
-    { name = "sympy" },
-    { name = "typing-extensions" },
+    { name = "filelock", marker = "sys_platform == 'darwin'" },
+    { name = "fsspec", marker = "sys_platform == 'darwin'" },
+    { name = "jinja2", marker = "sys_platform == 'darwin'" },
+    { name = "networkx", marker = "sys_platform == 'darwin'" },
+    { name = "setuptools", marker = "sys_platform == 'darwin'" },
+    { name = "sympy", marker = "sys_platform == 'darwin'" },
+    { name = "typing-extensions", marker = "sys_platform == 'darwin'" },
 ]
 wheels = [
     { url = "https://download-r2.pytorch.org/whl/cpu/torch-2.14.1-cp312-cp312-macosx_14_0_arm64.whl", hash = "sha256:9cf3082d25560efb1eef921871595227c0cf305abb7761ca45b6b988ef6cdd45", upload-time = "2026-09-30T19:50:32Z" },
@@ -1618,13 +1620,13 @@ resolution-markers = [
     "python_full_version < '3.14' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'",
 ]
 dependencies = [
-    { name = "filelock" },
-    { name = "fsspec" },
-    { name = "jinja2" },
-    { name = "networkx" },
-    { name = "setuptools" },
-    { name = "sympy" },
-    { name = "typing-extensions" },
+    { name = "filelock", marker = "sys_platform != 'darwin'" },
+    { name = "fsspec", marker = "sys_platform != 'darwin'" },
+    { name = "jinja2", marker = "sys_platform != 'darwin'" },
+    { name = "networkx", marker = "sys_platform != 'darwin'" },
+    { name = "setuptools", marker = "sys_platform != 'darwin'" },
+    { name = "sympy", marker = "sys_platform != 'darwin'" },
+    { name = "typing-extensions", marker = "sys_platform != 'darwin'" },
 ]
 wheels = [
     { url = "https://download-r2.pytorch.org/whl/cpu/torch-2.14.1%2Bcpu-cp312-cp312-linux_s390x.whl", hash = "sha256:6b06a7f6275c5fdecaf1dbf5546f0820b024a97785575bb99e3d9930d83cd86b", upload-time = "2026-09-30T19:47:30Z" },
@@ -1662,9 +1664,9 @@ resolution-markers = [
     "python_full_version < '3.14' and sys_platform == 'darwin'",
 ]
 dependencies = [
-    { name = "numpy" },
-    { name = "pillow" },
-    { name = "torch", version = "2.14.1", source = { registry = "https://download.pytorch.org/whl/cpu" } },
+    { name = "numpy", marker = "sys_platform == 'darwin'" },
+    { name = "pillow", marker = "sys_platform == 'darwin'" },
+    { name = "torch", version = "2.14.1", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "sys_platform == 'darwin'" },
 ]
 wheels = [
     { url = "https://download-r2.pytorch.org/whl/cpu/torchvision-0.29.1-cp312-cp312-macosx_14_0_arm64.whl", hash = "sha256:3b6eb9d2f8fe9b93d9d37637749df361efeed133d96ddd503184a1b5b12bb27f", upload-time = "2026-09-30T15:46:12Z" },
@@ -1688,9 +1690,9 @@ resolution-markers = [
     "python_full_version < '3.14' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'",
 ]
 dependencies = [
-    { name = "numpy" },
-    { name = "pillow" },
-    { name = "torch", version = "2.14.1+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" } },
+    { name = "numpy", marker = "sys_platform != 'darwin'" },
+    { name = "pillow", marker = "sys_platform != 'darwin'" },
+    { name = "torch", version = "2.14.1+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "sys_platform != 'darwin'" },
 ]
 wheels = [
     { url = "https://download-r2.pytorch.org/whl/cpu/torchvision-0.29.1%2Bcpu-cp312-cp312-manylinux_2_28_aarch64.whl", hash = "sha256:3058f855e65089330ec987b8cac1ccf5e7a26cd475f8cab20597b5577ddc8767", upload-time = "2026-09-30T15:46:11Z" },
