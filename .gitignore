@@ -5,5 +5,4 @@ uploads/*
 !uploads/.gitkeep
 *.db
 .cache/
-data/scraped/
-data/*.db
+data/*
